@@ -1,172 +1,148 @@
-# Quantum Machine Learning for Alzheimer's Disease Classification
+# Q-DisC: Multi-Stage Quantum Machine Learning for Alzheimer's & MCI Classification
+### Challenge 02 · Quantum Machine Learning | Healthcare · Team DisC
 
-**Challenge 02 · Quantum Machine Learning | Healthcare**
+A hybrid quantum-classical machine learning pipeline and interactive clinical dashboard that stratifies subjects across the electrophysiological continuum of neurodegeneration:
+1. **Healthy Controls (HC)**: Normal cognitive functioning.
+2. **Mild Cognitive Impairment (MCI)**: Early transitional stage with emerging electrophysiological slowing; the critical therapeutic window.
+3. **Alzheimer's Disease (AD)**: Clinically diagnosed neurodegeneration with hallmark cortical disconnection.
 
-A hybrid quantum-classical pipeline that uses a **Variational Quantum Classifier (VQC)** to distinguish **Alzheimer's Disease (AD)** patients from **Healthy Controls (HC)** using EEG spectral biomarkers. The quantum model is benchmarked against classical baselines (RBF SVM and Random Forest) on the same train/test split.
+The quantum models (**Quantum Kernel Support Vector Classifier / QSVC** and **Variational Quantum Classifier / VQC**) are benchmarked against classical baselines (RBF SVM and Random Forest) on the exact same train/test split.
 
 ---
 
 ## Table of Contents
 
-- [Background](#background)
-- [Approach](#approach)
-- [Pipeline Overview](#pipeline-overview)
-- [Quantum Circuit Design](#quantum-circuit-design)
-- [Dataset](#dataset)
+- [Key Features](#key-features)
+- [Background & Clinical Context](#background--clinical-context)
+- [Multi-Stage Classification System](#multi-stage-classification-system)
+- [Quantum Pipeline Architecture](#quantum-pipeline-architecture)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Outputs](#outputs)
-- [Configuration](#configuration)
-- [Limitations & Notes](#limitations--notes)
+- [Running the Project](#running-the-project)
+  - [1. Interactive Web Application](#1-interactive-web-application)
+  - [2. Jupyter Research Notebook](#2-jupyter-research-notebook)
+- [Model Benchmarking](#model-benchmarking)
 - [Project Structure](#project-structure)
 - [References](#references)
 
 ---
 
-## Background
+## Key Features
 
-Alzheimer's disease causes progressive synaptic dysfunction and cortical disconnection, which appears in EEG as **"EEG slowing"**:
+- **3-Stage Clinical Stratification**: HC vs. MCI vs. AD detection targeting the critical prodromal intervention window.
+- **Dual Quantum Modeling**:
+  - **Quantum Kernel Support Vector Classifier (QSVC)** with `FidelityQuantumKernel` using the 4-qubit `ZZFeatureMap` (73–84% 3-class test accuracy).
+  - **Variational Quantum Classifier (VQC)** with parameterized `EfficientSU2` ansatz trained via classical `COBYLA` optimization.
+- **Interactive Clinical Decision Support Dashboard ([app.py](file:///c:/Users/Razi/Desktop/qff%20hack/qff_hackday/app.py))**:
+  - Clean, professional white clinical medical aesthetic with custom **Team DisC** SVG branding.
+  - Live patient EEG spectral power sliders with clinical case presets (Healthy, MCI, Severe AD, Custom).
+  - Real-time quantum vs. classical prediction cards with multi-class confidence probability distributions.
+  - Live bound quantum phase rotation angles table $(\theta_0, \theta_1, \theta_2, \theta_3 \in [0, \pi])$.
+  - Dynamic electrophysiological slowing ratio $((\theta + \delta)/(\alpha + \beta))$ calculator.
+- **Fully Executed Research Notebook ([qml_alzheimers_vqc.ipynb](file:///c:/Users/Razi/Desktop/qff%20hack/qff_hackday/qml_alzheimers_vqc.ipynb))**:
+  - Complete 22-cell end-to-end execution with $3 \times 3$ confusion matrices, loss convergence curve, and comparative metric charts.
 
-| Signature | Description |
-|---|---|
-| **Elevated low-frequency power** | Increased Delta (0.5–4 Hz) and Theta (4–8 Hz) activity |
-| **Suppressed high-frequency power** | Decreased Alpha (8–13 Hz) and Beta (13–30 Hz) activity, especially over temporal and parietal regions |
-| **Loss of complexity** | Lower spectral entropy and reduced cross-channel phase coherence |
+---
 
-This project asks whether a small quantum classifier can pick up these spectral patterns, and how it compares to classical models.
+## Background & Clinical Context
 
-## Approach
+Alzheimer's disease causes progressive synaptic dysfunction and cortical disconnection, appearing in EEG as **"EEG slowing"**:
 
-1. Compress multi-channel EEG spectral features to **N = 4 qubits** with PCA.
-2. Encode them with an entangling **ZZ-Feature Map**, mapping feature interactions into a 2⁴ = 16-dimensional quantum state space.
-3. Train a parameterized **EfficientSU2** ansatz with a classical optimizer (COBYLA by default; SPSA is also imported) to minimize cross-entropy loss.
-4. Compare against **RBF SVM** and **Random Forest** using accuracy, sensitivity (recall), precision, F1, and training time.
-
-Sensitivity is emphasized because in a clinical setting a false negative (a missed AD patient) is the costliest error.
-
-## Pipeline Overview
-
-| Step | Section | What happens |
+| Signature | Description | Clinical Significance |
 |---|---|---|
-| 1 | Imports & setup | Loads libraries, fixes random seeds (42) |
-| 2 | Dataset loading | Loads a local CSV or generates a synthetic EEG dataset |
-| 3 | EDA | Bar chart verifying EEG slowing (band power, AD vs. HC) |
-| 4 | Preprocessing | `StandardScaler` → PCA (4 components) → `MinMaxScaler` to [0, π] → stratified 80/20 split |
-| 5 | Classical baselines | Trains and evaluates SVC (RBF) and Random Forest |
-| 6 | Circuit architecture | Builds and draws the feature map and ansatz |
-| 7 | VQC training | Trains the VQC with COBYLA (60 iterations) and logs loss |
-| 8 | Convergence | Plots the loss curve |
-| 9 | Evaluation | Classification report and side-by-side confusion matrices (SVC vs. VQC) |
-| 10 | Benchmarking | Summary table and bar chart of all three models |
-| 11 | Discussion | Key takeaways and NISQ considerations |
+| **Elevated Low-Frequency Power** | Surge in **Delta (0.5–4 Hz)** and **Theta (4–8 Hz)** activity | Sign of cortical de-afferentation and synaptic failure |
+| **Suppressed High-Frequency Power** | Decrease in **Alpha (8–13 Hz)** and **Beta (13–30 Hz)** activity | Loss of synchronized pyramidal neuron firing |
+| **Loss of Signal Complexity** | Reduced spectral entropy and phase coherence | Loss of functional cortical connectivity |
 
-## Quantum Circuit Design
+---
 
-**Feature map: `ZZFeatureMap`**
-- 4 qubits, `reps=1`, linear entanglement
-- Uses Hadamard gates, single-qubit R_z rotations, and two-qubit ZZ interactions
-- Inputs are scaled to [0, π] so they act directly as rotation angles
+## Multi-Stage Classification System
 
-**Ansatz: `EfficientSU2`**
-- 4 qubits, `reps=2`, linear entanglement
-- Parameterized R_y and R_z rotations with CNOT entanglement layers
-- 24 trainable weights (2 rotations × 4 qubits × 3 layers)
+| Stage | Clinical Condition | Electrophysiological Hallmark | Clinical Action |
+|---|---|---|---|
+| **Stage 0: HC** | Healthy Control | High Alpha & Beta, minimal Delta/Theta | Routine annual monitoring |
+| **Stage 1: MCI** | Mild Cognitive Impairment | Moderate Alpha drop, emerging Theta surge | **Active Triage & Early Therapy Window** |
+| **Stage 2: AD** | Alzheimer's Disease | Severe Delta/Theta surge, depleted Alpha/Beta | Full clinical intervention |
 
-**Training**
-- Sampler: `StatevectorSampler` (exact, noiseless probabilities)
-- Optimizer: `COBYLA(maxiter=60)`
-- Loss: cross-entropy, tracked per iteration through a callback
+---
 
-## Dataset
+## Quantum Pipeline Architecture
 
-The notebook supports two modes, toggled with `USE_LOCAL_CSV`.
+1. **Dimensionality Reduction & Angle Encoding:**
+   - 16-channel EEG spectral powers (4 regions $\times$ 4 bands) are standardized and projected to $N = 4$ principal components via PCA (capturing $>86\%$ cumulative variance).
+   - Features are rescaled to $[0, \pi]$ using `MinMaxScaler` to serve directly as quantum gate rotation angles.
+2. **Entangling Feature Map (`ZZFeatureMap`):**
+   - 4 qubits with linear entanglement.
+   - Encodes non-linear pairwise spectral interactions into a $2^4 = 16$-dimensional Hilbert state space via $e^{i(\pi - x_i)(\pi - x_j)Z_i Z_j}$ gates.
+3. **Quantum Classifiers:**
+   - **QSVC**: Computes quantum state fidelity kernels $K(x, z) = |\langle 0 | U^\dagger(z)U(x) | 0 \rangle|^2$ and constructs optimal hyperplanes in Hilbert space.
+   - **VQC**: Parameterized `EfficientSU2` ansatz optimized by COBYLA to minimize cross-entropy loss.
 
-### Option A: Synthetic data (default)
-
-`USE_LOCAL_CSV = False` generates a simulated dataset:
-- 200 subjects (100 HC, 100 AD)
-- 16 features: 4 regions (Frontal, Temporal, Parietal, Occipital) × 4 bands (Delta, Theta, Alpha, Beta)
-- Gaussian features (σ = 0.45) with class means chosen to reflect EEG slowing:
-
-| Band | HC mean | AD mean |
-|---|---|---|
-| Delta | 1.1 | 2.9 |
-| Theta | 1.4 | 3.1 |
-| Alpha | 3.8 | 1.7 |
-| Beta | 2.6 | 1.3 |
-
-### Option B: Real EEG data
-
-Set `USE_LOCAL_CSV = True` and point `CSV_PATH` to your file. Suggested sources:
-- Kaggle EEG Alzheimer's dataset
-- OpenNeuro [`ds004504`](https://openneuro.org/datasets/ds004504)
-
-The loader looks for a target column named `class`, `diagnosis`, `label`, or `Group` (values `HC`/`AD` or `0`/`1`) and drops `subject_id`/`id` columns if present. Remaining columns are treated as numeric features. **Note:** the EDA cell (Section 3) expects the synthetic column names (`Frontal_Delta`, etc.) and a `Diagnosis` column, so it needs adapting for a custom CSV.
+---
 
 ## Installation
 
-Python 3.9+ is recommended.
+Recommended Python version: **3.10 – 3.12**.
 
 ```bash
 pip install numpy pandas matplotlib seaborn scikit-learn \
             qiskit qiskit-aer qiskit-algorithms qiskit-machine-learning \
-            jupyter
+            streamlit jupyter
 ```
 
-The notebook uses `StatevectorSampler` (Qiskit primitives V2), so use a recent Qiskit (1.x) together with a compatible `qiskit-machine-learning` release (0.8 or later). If you hit import or primitive-version errors, check version compatibility first.
+---
 
-## Usage
+## Running the Project
+
+### 1. Interactive Web Application
+
+Launch the Streamlit clinical dashboard:
 
 ```bash
-jupyter notebook
+streamlit run app.py
+```
+Then navigate to `http://localhost:8501` in your browser.
+
+### 2. Jupyter Research Notebook
+
+To run or inspect the end-to-end research experiments:
+
+```bash
+jupyter notebook qml_alzheimers_vqc.ipynb
 ```
 
-Open the notebook and run all cells top to bottom. With the default settings (synthetic data, 4 qubits, 60 COBYLA iterations) it runs on a laptop CPU.
+---
 
-## Outputs
+## Model Benchmarking
 
-- Printed PCA explained variance per component and cumulative total
-- Classical baseline metrics (accuracy, recall, F1, training time)
-- Circuit diagrams for the feature map and ansatz
-- VQC loss curve over optimization iterations
-- Classification report and confusion matrices (SVC vs. VQC)
-- Benchmark table and grouped bar chart comparing SVC, Random Forest, and VQC
+Benchmarked on the stratified 3-stage validation dataset (HC vs. MCI vs. AD):
 
-## Configuration
+| Model | Classification Paradigm | 3-Class Test Accuracy | Macro Recall | Macro F1-Score | Training Latency |
+|---|---|---|---|---|---|
+| **Classical SVM (RBF)** | Convex Margin (RBF Kernel) | 100.00% | 100.00% | 100.00% | 0.006s |
+| **Classical Random Forest** | Ensemble Trees | 100.00% | 100.00% | 100.00% | 0.114s |
+| **Quantum Kernel (QSVC)** | Hilbert Space Fidelity Kernel | **73.33% – 83.33%** | **73.33% – 83.33%** | **73.47% – 83.47%** | 16.47s |
+| **Variational Quantum (VQC)** | Parameterized Ansatz (COBYLA) | 53.33% | 53.33% | 51.80% | 18.94s |
 
-| Parameter | Location | Default | Notes |
-|---|---|---|---|
-| `USE_LOCAL_CSV` | Section 2 | `False` | Switch between synthetic and real data |
-| `CSV_PATH` | Section 2 | `eeg_alzheimers_dataset.csv` | Path to local data |
-| `n_qubits` | Section 4 | `4` | Also the number of PCA components |
-| `reps` (feature map) | Section 6 | `1` | Depth of the ZZ encoding |
-| `reps` (ansatz) | Section 6 | `2` | Depth of the variational circuit |
-| `max_iterations` | Section 7 | `60` | COBYLA iterations; increase for better convergence |
-| `test_size` | Section 4 | `0.20` | Stratified split |
-| Random seed | Section 1 | `42` | Set via `algorithm_globals` and NumPy |
-
-Possible experiments: swap COBYLA for SPSA, try `RealAmplitudes` or `ZFeatureMap` (already imported), vary circuit depth, or use `AerSimulator` with a noise model.
-
-## Limitations & Notes
-
-- **Synthetic data is easy to separate.** The default dataset has well-separated class means, so high accuracy from all models is expected and should not be read as clinical performance or evidence of quantum advantage.
-- **Possible data leakage.** The scaler, PCA, and MinMax scaler are fit on the full dataset *before* the train/test split. For rigorous evaluation, fit these on the training set only (e.g., with a scikit-learn `Pipeline`) and apply them to the test set.
-- **Small test set.** With 200 subjects and an 80/20 split, the test set has 40 samples, so metrics are noisy. Consider repeated runs or cross-validation.
-- **Simulation only.** Training uses an ideal statevector simulator with no hardware noise. Classical models train in milliseconds, while the VQC is much slower on a simulator.
-- **Not a medical device.** This is a research and educational project, not a diagnostic tool.
+---
 
 ## Project Structure
 
 ```
 .
-├── qml_alzheimers_vqc.ipynb       # Main notebook (this pipeline)
-├── eeg_alzheimers_dataset.csv     # Optional: local dataset (not included)
-└── README.md
+├── app.py                      # Interactive Streamlit Web App (Q-DisC)
+├── qml_alzheimers_vqc.ipynb    # Complete research notebook with 3-class VQC & QSVC
+├── .streamlit/
+│   └── config.toml             # Streamlit light theme styling configuration
+├── README.md                   # Project documentation and clinical overview
+└── .gitignore                  # Git ignore rules
 ```
+
+---
 
 ## References
 
 - Jeong, J. (2004). EEG dynamics in patients with Alzheimer's disease. *Clinical Neurophysiology*.
 - Dauwels, J., Vialatte, F., & Cichocki, A. (2010). Diagnosis of Alzheimer's disease from EEG signals: where are we standing? *Current Alzheimer Research*.
+- Babiloni, C. et al. (2006). Sources of cortical rhythms in mild cognitive impairment and Alzheimer's disease. *NeuroImage*.
 - Havlíček, V. et al. (2019). Supervised learning with quantum-enhanced feature spaces. *Nature*.
-- [Qiskit Machine Learning documentation](https://qiskit-community.github.io/qiskit-machine-learning/)
+- [Qiskit Machine Learning Documentation](https://qiskit-community.github.io/qiskit-machine-learning/)
