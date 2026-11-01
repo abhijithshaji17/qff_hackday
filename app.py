@@ -22,7 +22,7 @@ from qiskit_machine_learning.kernels import FidelityQuantumKernel
 # Page Configuration
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="NeuroQuant · Quantum EEG Alzheimer's Classifier",
+    page_title="Q-DisC · Quantum EEG Alzheimer's Classifier",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -313,7 +313,7 @@ st.markdown(f"""
         <div>{DISC_LOGO_SVG}</div>
         <div>
             <div style="display: flex; align-items: center; gap: 10px;">
-                <h1 class="header-title">NeuroQuant</h1>
+                <h1 class="header-title">Q-DisC</h1>
                 <span style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; padding: 2px 10px; border-radius: 6px; font-weight: 700; font-size: 13px; letter-spacing: 0.05em;">TEAM DisC</span>
             </div>
             <p class="header-subtitle">Multi-Stage Quantum Machine Learning for Alzheimer's & MCI Classification · Challenge 02</p>
