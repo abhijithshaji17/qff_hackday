@@ -248,11 +248,52 @@ models = load_trained_models()
 # -----------------------------------------------------------------------------
 # Header Bar
 # -----------------------------------------------------------------------------
-st.markdown("""
+# Team DisC SVG Logo Component
+# -----------------------------------------------------------------------------
+DISC_LOGO_SVG = """
+<svg width="52" height="52" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="discGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#9333ea" />
+    </linearGradient>
+    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+  </defs>
+  <!-- Outer Quantum Disc Ring -->
+  <circle cx="50" cy="50" r="46" fill="#f1f5f9" />
+  <circle cx="50" cy="50" r="46" stroke="url(#discGrad)" stroke-width="2.5" />
+  <!-- Quantum Elliptic Orbit -->
+  <ellipse cx="50" cy="50" rx="38" ry="15" transform="rotate(-30 50 50)" stroke="url(#orbitGrad)" stroke-width="2" stroke-dasharray="4 2" />
+  <ellipse cx="50" cy="50" rx="38" ry="15" transform="rotate(30 50 50)" stroke="url(#discGrad)" stroke-width="2.2" />
+  <!-- Quantum Qubit Nodes -->
+  <circle cx="20" cy="34" r="4.5" fill="#2563eb" />
+  <circle cx="80" cy="66" r="4.5" fill="#7c3aed" />
+  <circle cx="50" cy="16" r="3.5" fill="#0284c7" />
+  <!-- Central EEG Healthcare Waveform -->
+  <path d="M 26 50 L 36 50 L 42 36 L 48 64 L 54 42 L 60 50 L 74 50" stroke="#1d4ed8" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Center Core -->
+  <circle cx="50" cy="50" r="3" fill="#9333ea" />
+</svg>
+"""
+
+# -----------------------------------------------------------------------------
+# Header Bar with Team DisC Logo
+# -----------------------------------------------------------------------------
+st.markdown(f"""
 <div class="header-container">
-    <div>
-        <h1 class="header-title">NeuroQuant · Hybrid Quantum Classifier</h1>
-        <p class="header-subtitle">Challenge 02 · Quantum Machine Learning for Alzheimer's Disease Classification</p>
+    <div style="display: flex; align-items: center; gap: 18px;">
+        <div>{DISC_LOGO_SVG}</div>
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h1 class="header-title">NeuroQuant</h1>
+                <span style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; padding: 2px 10px; border-radius: 6px; font-weight: 700; font-size: 13px; letter-spacing: 0.05em;">TEAM DisC</span>
+            </div>
+            <p class="header-subtitle">Quantum Machine Learning for EEG Alzheimer's Disease Classification · Challenge 02</p>
+        </div>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
         <span class="badge-quantum">⚡ 4-Qubit VQC Active</span>
@@ -262,9 +303,19 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Sidebar: Patient Parameters & Presets
+# Sidebar: Team Branding & Patient Parameters
 # -----------------------------------------------------------------------------
 with st.sidebar:
+    st.markdown(f"""
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+        <div>{DISC_LOGO_SVG}</div>
+        <div>
+            <div style="font-weight: 800; font-size: 17px; color: #0f172a; letter-spacing: -0.01em;">Team DisC</div>
+            <div style="font-size: 11px; color: #64748b; font-weight: 600;">Disease Classification Lab</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("### 📋 Patient EEG Profiles")
     preset = st.selectbox(
         "Choose Clinical Case Preset:",
