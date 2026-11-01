@@ -2,5 +2,8 @@
 /qiskit-env
 /qtest.ipynb
 /test.py
+/requirements.txt
+/.vscode
+/__pycache__
 __pycache__/
 *.pyc
