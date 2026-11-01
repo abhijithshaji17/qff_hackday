@@ -21,7 +21,7 @@ from qiskit_machine_learning.optimizers import COBYLA
 # Page Configuration
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="NeuroQuant · Quantum EEG Alzheimer's Classifier",
+    page_title="Q-DisC · Quantum EEG Alzheimer's Classifier",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -288,10 +288,7 @@ st.markdown(f"""
     <div style="display: flex; align-items: center; gap: 18px;">
         <div>{DISC_LOGO_SVG}</div>
         <div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <h1 class="header-title">NeuroQuant</h1>
-                <span style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; padding: 2px 10px; border-radius: 6px; font-weight: 700; font-size: 13px; letter-spacing: 0.05em;">TEAM DisC</span>
-            </div>
+            <h1 class="header-title">Q-DisC</h1>
             <p class="header-subtitle">Quantum Machine Learning for EEG Alzheimer's Disease Classification · Challenge 02</p>
         </div>
     </div>
@@ -310,7 +307,7 @@ with st.sidebar:
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
         <div>{DISC_LOGO_SVG}</div>
         <div>
-            <div style="font-weight: 800; font-size: 17px; color: #0f172a; letter-spacing: -0.01em;">Team DisC</div>
+            <div style="font-weight: 800; font-size: 17px; color: #0f172a; letter-spacing: -0.01em;">Q-DisC</div>
             <div style="font-size: 11px; color: #64748b; font-weight: 600;">Disease Classification Lab</div>
         </div>
     </div>
